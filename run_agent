@@ -1,0 +1,47 @@
+#!/bin/zsh
+
+# Letwrk Agent Runner Script
+# Automatically activates virtual environment and runs the agent
+
+echo "🚀 Starting Letwrk Agent..."
+
+# Check if virtual environment exists
+if [ ! -d "letwrk_env" ]; then
+    echo "❌ Virtual environment not found!"
+    echo "Please run setup first:"
+    echo "   python3 -m venv letwrk_env"
+    echo "   source letwrk_env/bin/activate"
+    echo "   pip install --upgrade pip"
+    echo "   pip install -r requirements.txt"
+    exit 1
+fi
+
+# Activate virtual environment
+echo "🔧 Activating virtual environment..."
+source letwrk_env/bin/activate
+
+# Check if dependencies are installed
+if ! python -c "import langchain, rapidfuzz" 2>/dev/null; then
+    echo "❌ Dependencies not installed!"
+    echo "Installing dependencies..."
+    pip install -r requirements.txt
+fi
+
+# Check if OpenAI API key is set
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "⚠️  Warning: OPENAI_API_KEY environment variable not set"
+    echo "For full AI functionality, you need an OpenAI API key:"
+    echo "   1. Get API key from: https://platform.openai.com/api-keys"
+    echo "   2. Set it with: export OPENAI_API_KEY='your-api-key-here'"
+    echo "   3. Or add it to your ~/.zshrc file"
+    echo ""
+    echo "Continuing with basic functionality (no AI chat)..."
+    echo "Running tests instead..."
+    echo ""
+    python test_agent.py
+    exit 0
+fi
+
+# Run the agent
+echo "🤖 Starting Letwrk Agent..."
+python letwrk_agent.py 
