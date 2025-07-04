@@ -34,7 +34,6 @@ class TaskCreateRequest(BaseModel):
 
 class TaskUpdateRequest(BaseModel):
     """Request model for updating tasks"""
-    task_id: int = Field(..., description="Task ID to update")
     status: Optional[str] = Field(None, description="New status (pending/in_progress/done)")
     assignee: Optional[str] = Field(None, description="New assignee")
     priority: Optional[str] = Field(None, description="New priority (high/medium/low)")
