@@ -38,10 +38,10 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo "Continuing with basic functionality (no AI chat)..."
     echo "Running tests instead..."
     echo ""
-    python test_agent.py
+    python -c "from src.core.cli import run_test_mode; run_test_mode()"
     exit 0
 fi
 
 # Run the agent
 echo "🤖 Starting Letwrk Agent..."
-python letwrk_agent.py 
+python main.py 

@@ -16,6 +16,7 @@ A conversational AI productivity assistant powered by **OpenAI GPT** via **LangC
 - **🛠️ Custom Tools**: Three specialized tools for task management
 - **💾 Conversation Memory**: Maintains context across interactions
 - **🔧 Error Handling**: Graceful error handling with helpful messages
+- **🏗️ Modular Architecture**: Clean, maintainable code structure
 
 ## Quick Start 🏁
 
@@ -140,45 +141,75 @@ Built-in team members (easily customizable):
 ### Project Structure
 ```
 letwrk_agent/
-├── letwrk_env/          # Virtual environment
-├── letwrk_agent.py      # Main AI agent (400 lines)
-├── test_agent.py        # Comprehensive tests
-├── requirements.txt     # Dependencies
-├── run_agent            # Auto-runner script
-├── setup_env.sh         # Environment setup helper
-├── SETUP.md            # Detailed setup guide
-└── README.md           # This file
+├── src/                    # Source code directory
+│   ├── config/            # Configuration settings
+│   │   └── settings.py    # All constants and settings
+│   ├── core/              # Core application logic
+│   │   ├── agent.py       # LangChain agent creation
+│   │   └── cli.py         # Command-line interface
+│   ├── models/            # Data models
+│   │   └── task.py        # Task model and manager
+│   ├── tools/             # LangChain tools
+│   │   └── task_tools.py  # Task management tools
+│   └── utils/             # Utility functions
+│       ├── fuzzy_matcher.py # Name matching utilities
+│       ├── formatters.py    # Output formatting
+│       └── parsers.py       # Input parsing
+├── letwrk_env/            # Virtual environment
+├── main.py                # Main entry point
+├── test_refactored.py     # Test script
+├── requirements.txt       # Dependencies
+├── run_agent             # Auto-runner script
+├── setup_env.sh          # Environment setup helper
+├── SETUP.md             # Detailed setup guide
+└── README.md            # This file
 ```
 
 ### Core Components
 
-1. **Main Agent** (`create_agent()`):
+1. **Main Entry Point** (`main.py`):
+   - Clean entry point for the application
+   - Imports and runs the CLI interface
+
+2. **Agent Core** (`src/core/agent.py`):
    - LangChain agent with OPENAI_FUNCTIONS
    - OpenAI GPT LLM via ChatOpenAI
    - Conversation memory
    - System prompt for behavior definition
 
-2. **Tools** (`create_langchain_tools()`):
+3. **Task Tools** (`src/tools/task_tools.py`):
    - `read_tasks`: List and filter tasks
-   - `create_task`: Create new tasks
-   - `update_task`: Update task status/assignee
+   - `create_task`: Create new tasks or analyze meetings
+   - `update_task`: Update task status/assignee (single or bulk)
+   - `create_suggested_tasks`: Handle task suggestions
 
-3. **Fuzzy Matching** (`fuzzy_match_name()`):
-   - Uses RapidFuzz for name similarity
-   - 70% confidence threshold
-   - Returns best match with confidence score
+4. **Task Model** (`src/models/task.py`):
+   - Task data structure with dataclass
+   - TaskManager for CRUD operations
+   - Mock data initialization
+
+5. **Utilities** (`src/utils/`):
+   - `fuzzy_matcher.py`: Name matching with RapidFuzz
+   - `formatters.py`: Response formatting
+   - `parsers.py`: Input parsing and validation
+
+6. **Configuration** (`src/config/settings.py`):
+   - Centralized settings and constants
+   - Team members, thresholds, patterns
+   - Emoji mappings and regex patterns
 
 ### Data Structure
 ```python
-{
-    "id": 1,
-    "title": "Review API documentation",
-    "assignee": "Ravi",
-    "status": "in_progress",  # pending, in_progress, done
-    "priority": "high",       # high, medium, low
-    "created_at": "2024-01-15",
-    "due_date": "2024-01-20"
-}
+@dataclass
+class Task:
+    id: int
+    title: str
+    assignee: str
+    status: str  # pending, in_progress, done
+    priority: str  # high, medium, low
+    created_at: str
+    due_date: str
+    description: Optional[str] = None
 ```
 
 ## Dependencies 📦
@@ -197,50 +228,45 @@ rapidfuzz>=3.5.0
 - **Agent Type**: `OPENAI_FUNCTIONS`
 
 ### Customization
-- **Team Members**: Edit `TEAM_MEMBERS` list in `letwrk_agent.py`
-- **Mock Data**: Replace `MOCK_TASKS` with database connection
-- **Tools**: Add new tools following the existing pattern
+- **Team Members**: Edit `TEAM_MEMBERS` list in `src/config/settings.py`
+- **Fuzzy Matching**: Adjust `FUZZY_MATCH_THRESHOLD` in settings
+- **Default Values**: Modify task defaults in settings
 
-## Troubleshooting 🔧
-
-### Common Issues
-
-1. **"Failed to initialize Letwrk agent"**:
-   - Check if OPENAI_API_KEY is set: `echo $OPENAI_API_KEY`
-   - Get API key from: https://platform.openai.com/api-keys
-   - Set it with: `export OPENAI_API_KEY="your-key-here"`
-
-2. **Import Errors**:
-   - Activate virtual environment: `source letwrk_env/bin/activate`
-   - Install dependencies: `pip install -r requirements.txt`
-
-3. **Virtual Environment Issues**:
-   - Check Python version: `python3 --version` (requires 3.8+)
-   - Recreate if needed: `rm -rf letwrk_env && python3 -m venv letwrk_env`
-
-## Development 👨‍💻
-
-### Adding New Tools
-
-1. **Create tool function**:
-   ```python
-   def my_new_tool(query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-       # Tool logic here
-       return "Tool response"
-   ```
-
-2. **Add to tools list** in `create_langchain_tools()`
-
-3. **Update system prompt** to include new capabilities
+## Development 🛠️
 
 ### Testing
 ```bash
-# Activate virtual environment
-source letwrk_env/bin/activate
+# Run the test suite
+python test_refactored.py
 
-# Run comprehensive tests
-python test_agent.py
+# Test without API key
+python -c "from src.core.cli import run_test_mode; run_test_mode()"
 ```
+
+### Code Structure Benefits
+- **Modularity**: Each component has a single responsibility
+- **Maintainability**: Easy to modify and extend
+- **Testability**: Isolated components for better testing
+- **Reusability**: Utilities can be used across the application
+- **Configuration**: Centralized settings management
+
+### Adding New Features
+1. **New Tools**: Add to `src/tools/task_tools.py`
+2. **New Models**: Create in `src/models/`
+3. **New Utils**: Add to `src/utils/`
+4. **New Settings**: Update `src/config/settings.py`
+
+## Migration from Original 🚚
+
+The original single-file structure has been preserved as `letwrk_agent_original.py` for reference. The new modular structure maintains all original functionality while providing:
+
+- Better code organization
+- Easier maintenance
+- Improved testability
+- Enhanced extensibility
+- Cleaner separation of concerns
+
+All existing functionality works exactly the same way - only the internal structure has been improved.
 
 ## Future Enhancements 🔮
 
