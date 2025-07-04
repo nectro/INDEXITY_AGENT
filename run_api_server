@@ -1,0 +1,54 @@
+#!/bin/zsh
+
+# Letwrk AI Agent - FastAPI Server Runner Script
+# Automatically activates virtual environment and runs the API server
+
+echo "🚀 Starting Letwrk AI Agent API Server..."
+
+# Check if virtual environment exists
+if [ ! -d "letwrk_env" ]; then
+    echo "❌ Virtual environment not found!"
+    echo "Please run setup first:"
+    echo "   python3 -m venv letwrk_env"
+    echo "   source letwrk_env/bin/activate"
+    echo "   pip install --upgrade pip"
+    echo "   pip install -r requirements.txt"
+    exit 1
+fi
+
+# Activate virtual environment
+echo "🔧 Activating virtual environment..."
+source letwrk_env/bin/activate
+
+# Check if dependencies are installed
+if ! python -c "import fastapi, uvicorn" 2>/dev/null; then
+    echo "❌ FastAPI dependencies not installed!"
+    echo "Installing dependencies..."
+    pip install -r requirements.txt
+fi
+
+# Check if OpenAI API key is set
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "⚠️  Warning: OPENAI_API_KEY environment variable not set"
+    echo "For full AI functionality, you need an OpenAI API key:"
+    echo "   1. Get API key from: https://platform.openai.com/api-keys"
+    echo "   2. Set it with: export OPENAI_API_KEY='your-api-key-here'"
+    echo "   3. Or add it to your ~/.zshrc file"
+    echo ""
+    echo "The API server will start but AI features will be limited..."
+    echo ""
+fi
+
+# Set default environment variables if not set
+export HOST=${HOST:-"0.0.0.0"}
+export PORT=${PORT:-"8000"}
+export RELOAD=${RELOAD:-"false"}
+
+# Run the API server
+echo "🤖 Starting Letwrk AI Agent API Server..."
+echo "🌐 Server will run on: http://$HOST:$PORT"
+echo "📚 API Documentation: http://$HOST:$PORT/docs"
+echo "🔍 Health Check: http://$HOST:$PORT/api/v1/health"
+echo ""
+
+python api_server.py 

@@ -10,6 +10,8 @@ A conversational AI productivity assistant powered by **OpenAI GPT** via **LangC
 - **❓ Smart Clarification**: Asks clarifying questions for ambiguous requests
 - **💬 Conversational Interface**: Friendly, helpful responses with emojis
 - **🧠 Powered by OpenAI**: Uses GPT-3.5-turbo or GPT-4 via OpenAI API
+- **🌐 REST API**: FastAPI-based RESTful API for integration with other applications
+- **🔄 Session Management**: Conversation memory across API calls
 
 ### Technical Features
 - **🤖 LangChain Agent**: Uses `OPENAI_FUNCTIONS` agent type with tool calling
@@ -17,6 +19,7 @@ A conversational AI productivity assistant powered by **OpenAI GPT** via **LangC
 - **💾 Conversation Memory**: Maintains context across interactions
 - **🔧 Error Handling**: Graceful error handling with helpful messages
 - **🏗️ Modular Architecture**: Clean, maintainable code structure
+- **🚀 FastAPI Backend**: High-performance async API with automatic documentation
 
 ## Quick Start 🏁
 
@@ -47,9 +50,18 @@ export OPENAI_API_KEY="your-api-key-here"
 ```
 
 #### 3. Run the Agent
+
+**CLI Mode:**
 ```bash
 ./run_agent
 ```
+
+**API Mode:**
+```bash
+./run_api_server
+```
+
+The API server will start on `http://localhost:8000` with interactive documentation at `/docs`.
 
 ### Option B: Detailed Setup (New Users)
 
@@ -129,6 +141,44 @@ Assigned to 'Ankita' (interpreted 'Ankti' as 'Ankita' with 92% confidence)
 - `"Set task [id] to in progress"`
 - `"Assign task [id] to [name]"`
 
+## API Usage 🌐
+
+The Letwrk AI Agent also provides a RESTful API for integration with other applications.
+
+### Quick API Start
+```bash
+./run_api_server
+```
+
+### API Endpoints
+- **Chat**: `POST /api/v1/chat` - Process natural language messages
+- **Tasks**: `GET/POST/PUT/DELETE /api/v1/tasks` - Task management
+- **Meeting Analysis**: `POST /api/v1/meeting/analyze` - Extract tasks from meetings
+- **Sessions**: `GET/DELETE /api/v1/sessions` - Session management
+
+### Interactive Documentation
+- **Swagger UI**: `http://localhost:8000/docs`
+- **ReDoc**: `http://localhost:8000/redoc`
+
+### Express.js Integration Example
+```javascript
+const axios = require('axios');
+
+// Chat with AI
+const response = await axios.post('http://localhost:8000/api/v1/chat', {
+  message: "What tasks do I have today?"
+});
+
+// Create a task
+const task = await axios.post('http://localhost:8000/api/v1/tasks', {
+  title: "Update documentation",
+  assignee: "Ravi",
+  priority: "high"
+});
+```
+
+📖 **For complete API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md)**
+
 ## Team Members 👥
 
 Built-in team members (easily customizable):
@@ -151,16 +201,26 @@ letwrk_agent/
 │   │   └── task.py        # Task model and manager
 │   ├── tools/             # LangChain tools
 │   │   └── task_tools.py  # Task management tools
-│   └── utils/             # Utility functions
+│   ├── utils/             # Utility functions
 │       ├── fuzzy_matcher.py # Name matching utilities
 │       ├── formatters.py    # Output formatting
 │       └── parsers.py       # Input parsing
+│   └── api/               # FastAPI components
+│       ├── app.py         # FastAPI application
+│       ├── routes.py      # API routes
+│       ├── models.py      # Pydantic models
+│       ├── agent_service.py # Agent service
+│       └── session_manager.py # Session management
 ├── letwrk_env/            # Virtual environment
-├── main.py                # Main entry point
+├── main.py                # CLI entry point
+├── api_server.py          # API server entry point
 ├── test_refactored.py     # Test script
+├── test_api.py            # API test script
 ├── requirements.txt       # Dependencies
-├── run_agent             # Auto-runner script
+├── run_agent             # CLI runner script
+├── run_api_server        # API server runner script
 ├── setup_env.sh          # Environment setup helper
+├── API_DOCUMENTATION.md  # Comprehensive API docs
 ├── SETUP.md             # Detailed setup guide
 └── README.md            # This file
 ```
@@ -197,6 +257,13 @@ letwrk_agent/
    - Centralized settings and constants
    - Team members, thresholds, patterns
    - Emoji mappings and regex patterns
+
+7. **API Layer** (`src/api/`):
+   - `app.py`: FastAPI application with middleware
+   - `routes.py`: REST API endpoints
+   - `models.py`: Pydantic request/response models
+   - `agent_service.py`: Service layer for API operations
+   - `session_manager.py`: Session management for conversations
 
 ### Data Structure
 ```python
